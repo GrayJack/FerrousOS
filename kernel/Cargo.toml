@@ -1,0 +1,27 @@
+[package]
+name = "kernel"
+version = "0.1.0"
+authors = ["GrayJack <gr41.j4ck@gmail.com>"]
+edition = "2018"
+
+[package.metadata.bootimage]
+default-target = "kernel.json"
+
+[package.metadata.bootimage.bootloader]
+name = "bootloader"
+target = "x86_64-bootloader.json"
+
+[workspace]
+
+[dependencies]
+bootloader = "^0.3.11"
+
+[[bin]]
+name = "kernel"
+test = false
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
