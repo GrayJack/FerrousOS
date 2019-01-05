@@ -2,8 +2,6 @@
 #![no_std]
 #![no_main]
 
-use kernel::*;
-
 use bootloader::entry_point;
 
 #[cfg(not(test))]
