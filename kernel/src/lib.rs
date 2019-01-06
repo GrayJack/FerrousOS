@@ -1,6 +1,7 @@
 #![no_std]
 
 pub mod vga;
+pub mod uart;
 
 #[macro_export]
 macro_rules! kprintln {

@@ -3,6 +3,8 @@
 #![no_main]
 
 use kernel::{
+    self,
+    uart::{PortAddress, SerialPort},
     vga::Vga,
     kprint,
     kprintln,
@@ -18,8 +20,11 @@ pub extern "C" fn _start() -> ! {
     };
 
     let mut vga = Vga::new(slice);
+    kprintln!(vga, "Hello Kernel World!!");
 
-    kprintln!(vga, "Hello World");
+    let mut serial1 = SerialPort::new(PortAddress::COM1);
+    serial1.init();
+    kprintln!(vga, "Hello Serial: {:?}", serial1);
 
     loop {}
 }
