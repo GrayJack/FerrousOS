@@ -1,7 +1,10 @@
 #![no_std]
+#![feature(abi_x86_interrupt)]
 
 pub mod vga;
 pub mod uart;
+pub mod init;
+pub mod hid;
 
 #[macro_export]
 macro_rules! kprintln {
