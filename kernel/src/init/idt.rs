@@ -1,6 +1,9 @@
 use crate::{
     vga::Color,
-    init::vga::VGA,
+    init::{
+        gdt,
+        vga::VGA
+    },
     kprintln,
 };
 
@@ -21,7 +24,13 @@ lazy_static! {
 
         idt.divide_by_zero.set_handler_fn(divide_by_zero_handler);
         idt.breakpoint.set_handler_fn(breakpoint_handler);
-        idt.double_fault.set_handler_fn(double_fault_handler);
+
+        // Needs unsafe for the set_stack_index method.
+        unsafe {
+            idt.double_fault.set_handler_fn(double_fault_handler)
+                .set_stack_index(gdt::DOUBLE_FAULT_IST_INDEX);
+        }
+
         idt
     };
 }

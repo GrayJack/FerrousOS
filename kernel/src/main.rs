@@ -32,11 +32,18 @@ pub extern "C" fn _start() -> ! {
     // invoke a breakpoint exception
     // x86_64::instructions::int3();
 
-    // trigger a page fault
+    // Trigger a page fault
     // Double fault exception
-    unsafe {
-        *(0xdeadbeef as *mut u64) = 42;
-    };
+    // unsafe {
+    //     *(0xdeadbeef as *mut u64) = 42;
+    // };
+
+    // Trigger a stack overflow
+    fn stack_overflow() {
+        stack_overflow(); // for each recursion, the return address is pushed
+    }
+
+    stack_overflow();
 
     loop {}
 }
