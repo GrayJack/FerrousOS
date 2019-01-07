@@ -30,7 +30,13 @@ pub extern "C" fn _start() -> ! {
     kprintln!("Hello Serial: {:?}", serial1);
 
     // invoke a breakpoint exception
-    x86_64::instructions::int3();
+    // x86_64::instructions::int3();
+
+    // trigger a page fault
+    // Double fault exception
+    unsafe {
+        *(0xdeadbeef as *mut u64) = 42;
+    };
 
     loop {}
 }
