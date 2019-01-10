@@ -15,6 +15,7 @@ use x86_64::structures::idt::{
 use lazy_static::lazy_static;
 
 lazy_static! {
+    /// Default Interrupt Descriptor Table initialized.
     static ref IDT: Idt = {
         let mut idt = Idt::new();
 
@@ -35,6 +36,7 @@ lazy_static! {
     };
 }
 
+/// Loads the default Interrupt Descriptor Table.
 pub fn init() -> Result<(), &'static str> {
     IDT.load();
 
@@ -42,14 +44,20 @@ pub fn init() -> Result<(), &'static str> {
 }
 
 // Exception handler functions
+// Idea behind it: Print the exeption and return to normal activity when possible.
+// If happens to be not possible, print the exception and enter a infinite loop.
+
+/// Divide by Zero exception handler
 extern "x86-interrupt" fn divide_by_zero_handler(stack_frame: &mut ExceptionStackFrame) {
     exception_info("DIVIDE BY ZERO", stack_frame);
 }
 
+/// Breakpoint exception handler
 extern "x86-interrupt" fn breakpoint_handler(stack_frame: &mut ExceptionStackFrame) {
     exception_info("BREAKPOINT", stack_frame);
 }
 
+/// Double Fault exception handler
 extern "x86-interrupt" fn double_fault_handler(stack_frame: &mut ExceptionStackFrame, _error_code: u64) {
     exception_info("DOUBLE FAULT", stack_frame);
     // Make sure we print only one in this case.
@@ -58,6 +66,7 @@ extern "x86-interrupt" fn double_fault_handler(stack_frame: &mut ExceptionStackF
     loop {}
 }
 
+/// Helper function to the exception handler functions
 fn exception_info(type_str: &str, stack_frame: &mut ExceptionStackFrame) {
     VGA.lock().set_foreground(Color::Red);
     kprintln!("EXCEPTION: {}\n{:#?}", type_str, stack_frame);

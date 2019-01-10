@@ -6,6 +6,19 @@ pub mod uart;
 pub mod init;
 pub mod hid;
 
+/// Macro for printing to the standard output, with a newline.
+///
+/// There is 2 ways of using it: Especifying where to print, or
+/// using the standard VGA output in the kernel.
+///
+/// # Examples
+/// ```rust
+/// // Especifying
+/// kprintln!(VGA, "MyText");
+///
+/// // Using standard
+/// kprintln!("MyText");
+/// ```
 #[macro_export]
 macro_rules! kprintln {
     ($fmt:expr) => ($crate::kprint!(concat!($fmt, "\n")));
@@ -14,6 +27,19 @@ macro_rules! kprintln {
     ($ctx:ident, $fmt:expr, $($arg:tt)*) => ($crate::kprint!($ctx, concat!($fmt, "\n"), $($arg)*));
 }
 
+/// Macro for printing to the standard output.
+///
+/// There is 2 ways of using it: Especifying where to print, or
+/// using the standard VGA output in the kernel.
+///
+/// # Examples
+/// ```rust
+/// // Especifying
+/// kprint!(VGA, "MyText");
+///
+/// // Using standard
+/// kprint!("MyText");
+/// ```
 #[macro_export]
 macro_rules! kprint {
     ($($arg:tt)*) => ({

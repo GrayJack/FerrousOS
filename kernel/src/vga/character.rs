@@ -34,6 +34,7 @@ pub struct Character {
 }
 
 impl Character {
+    /// Creates a new instance of Character.
     pub fn new(character: u8, foreground: Color, background: Color) -> Character {
         let attribute = ((background as u8) << 4) + (foreground as u8);
 
@@ -43,6 +44,7 @@ impl Character {
         }
     }
 
+    /// Converts Character into a tuple of bytes
     pub fn as_bytes(&self) -> (u8, u8) {
         (self.character, self.attribute)
     }

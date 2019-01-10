@@ -8,7 +8,7 @@ use core::{
 use bitflags::bitflags;
 use x86_64::instructions::port::Port;
 
-/// The port adresses know.
+/// The port adresses known.
 ///
 /// COM1 and COM2 are for sure the right addresses,
 /// but COM3 and COM4 are less reliable, so use with caution.
@@ -40,6 +40,7 @@ bitflags! {
     }
 }
 
+/// Serial Port struct
 #[derive(Debug, Clone, PartialEq)]
 pub struct SerialPort {
     data: Port<u8>,
@@ -51,6 +52,7 @@ pub struct SerialPort {
 }
 
 impl SerialPort {
+    /// Create a new instance of SerialPort.
     // pub const fn new(base: PortAddress) -> SerialPort {
     pub fn new(base: PortAddress) -> SerialPort {
         let base = base as u16;
@@ -64,6 +66,7 @@ impl SerialPort {
         }
     }
 
+    // Initialize serial port
     pub fn init(&mut self) {
         unsafe {
             self.int_en.write(0x00);
@@ -83,6 +86,7 @@ impl SerialPort {
         }
     }
 
+    /// Put serial port to receive data
     // Not sure if that is right!!!! Remember to look at this later!!
     pub fn receive(&mut self) {
         unsafe {
@@ -91,6 +95,7 @@ impl SerialPort {
         }
     }
 
+    /// Put serial port to send data
     pub fn send(&mut self, data: u8) {
         unsafe {
             match data {

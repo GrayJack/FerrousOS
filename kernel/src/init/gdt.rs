@@ -16,6 +16,7 @@ pub const DOUBLE_FAULT_IST_INDEX: u16 = 0;
 
 // TSS is used on GDT, so makes sense putting it here instead of their own file.
 lazy_static! {
+    /// Default Task State Segment initialized.
     static ref TSS: Tss = {
         let mut tss = Tss::new();
         tss.interrupt_stack_table[DOUBLE_FAULT_IST_INDEX as usize] = {
@@ -31,6 +32,7 @@ lazy_static! {
 }
 
 lazy_static! {
+    /// Default Global Descriptor Table initialized.
     static ref GDT: (Gdt, Selectors) = {
         let mut gdt = Gdt::new();
         let code_selector = gdt.add_entry(Descriptor::kernel_code_segment());
@@ -40,6 +42,7 @@ lazy_static! {
     };
 }
 
+/// Loads the default Global Descriptor Table.
 pub fn init() -> Result<(), &'static str> {
     use x86_64::instructions::{
         segmentation::set_cs,
@@ -56,12 +59,15 @@ pub fn init() -> Result<(), &'static str> {
     Ok(())
 }
 
+/// Holds the segments for kernel code and Task State Segment.
+#[derive(Debug, Copy, Clone)]
 struct Selectors {
     code_selector: SegmentSelector,
     tss_selector: SegmentSelector,
 }
 
 impl Selectors {
+    /// Create new instance of Selectors.
     pub fn new(code_selector: SegmentSelector, tss_selector: SegmentSelector) -> Selectors {
         Selectors {
             code_selector,
