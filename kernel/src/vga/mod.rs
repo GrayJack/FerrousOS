@@ -15,7 +15,6 @@ const ROWS: usize = 25;
 const COLS: usize = 80;
 
 /// VGA struct. It needs to receive a mutable slice of u8.
-#[derive(Debug, Clone)]
 pub struct Vga<T: AsMut<[u8]>> {
     slice: T,
     buffer: [Character; ROWS * COLS],
