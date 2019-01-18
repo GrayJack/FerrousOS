@@ -10,14 +10,19 @@ use crate::{
     kprint,
 };
 
-use x86_64::structures::idt::{
-    ExceptionStackFrame,
-    InterruptDescriptorTable as Idt
+use x86_64::{
+    instructions::port::Port,
+    structures::idt::{
+        ExceptionStackFrame,
+        InterruptDescriptorTable as Idt
+    }
 };
 
 use lazy_static::lazy_static;
 
-pub const TIMER_INTERRUPT_ID: u8 = PIC_1_OFFSET;
+pub const TIMER_INTERRUPT_ID: u8 = PIC_1_OFFSET; // 32
+
+pub const KEYBOARD_INTERRUPT_ID: u8 = PIC_1_OFFSET + 1; // 33
 
 lazy_static! {
     /// Default Interrupt Descriptor Table initialized.
@@ -31,6 +36,7 @@ lazy_static! {
         idt.divide_by_zero.set_handler_fn(divide_by_zero_handler);
         idt.breakpoint.set_handler_fn(breakpoint_handler);
         idt[usize::from(TIMER_INTERRUPT_ID)].set_handler_fn(timer_interrupt_handler);
+        idt[usize::from(KEYBOARD_INTERRUPT_ID)].set_handler_fn(keyboard_interrupt_handler);
 
         // Needs unsafe for the set_stack_index method.
         unsafe {
@@ -72,11 +78,18 @@ extern "x86-interrupt" fn double_fault_handler(stack_frame: &mut ExceptionStackF
     hlt_loop();
 }
 
-extern "x86-interrupt" fn timer_interrupt_handler(
-    _stack_frame: &mut ExceptionStackFrame)
-{
+/// Time interrupt handler
+extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: &mut ExceptionStackFrame) {
     kprint!(".");
     unsafe { PICS.lock().notify_end_of_interrupt(TIMER_INTERRUPT_ID) }
+}
+
+/// Keyboard interrupt handler
+extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: &mut ExceptionStackFrame) {
+    let port = Port::new(0x60);
+    let scancode: u8 = unsafe{ port.read() };
+    kprint!("hello");
+    unsafe { PICS.lock().notify_end_of_interrupt(KEYBOARD_INTERRUPT_ID) }
 }
 
 /// Helper function to the exception handler functions
