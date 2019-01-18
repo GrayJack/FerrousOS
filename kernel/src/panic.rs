@@ -3,8 +3,11 @@ use core::{
     panic::PanicInfo,
 };
 
+use kernel::kprintln;
+
 #[panic_handler]
 #[no_mangle]
-fn panic(_info: &PanicInfo) -> ! {
+fn panic(info: &PanicInfo) -> ! {
+    kprintln!("{:?}", info);
     unsafe { intrinsics::abort() }
 }

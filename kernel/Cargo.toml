@@ -14,10 +14,12 @@ target = "x86_64-bootloader.json"
 [workspace]
 
 [dependencies]
-bootloader = "^0.3.12"
-bitflags = "^1.0.4"
-x86_64 = "^0.3.4"
+# bootloader = "^0.3.12"
+bootloader = { path = "../../../Source/bootloader"}
 spin = "^0.5.0"
+x86_64 = "^0.3.5"
+bitflags = "^1.0.4"
+pic8259_simple = "^0.1.1"
 lazy_static = { version = "^1.2.0", features = ["spin_no_std"] }
 
 [[bin]]

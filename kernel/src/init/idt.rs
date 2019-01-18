@@ -1,10 +1,13 @@
 use crate::{
+    hlt_loop,
     vga::Color,
     init::{
         gdt,
+        pic::{PICS, PIC_1_OFFSET},
         vga::VGA
     },
     kprintln,
+    kprint,
 };
 
 use x86_64::structures::idt::{
@@ -13,6 +16,8 @@ use x86_64::structures::idt::{
 };
 
 use lazy_static::lazy_static;
+
+pub const TIMER_INTERRUPT_ID: u8 = PIC_1_OFFSET;
 
 lazy_static! {
     /// Default Interrupt Descriptor Table initialized.
@@ -25,6 +30,7 @@ lazy_static! {
 
         idt.divide_by_zero.set_handler_fn(divide_by_zero_handler);
         idt.breakpoint.set_handler_fn(breakpoint_handler);
+        idt[usize::from(TIMER_INTERRUPT_ID)].set_handler_fn(timer_interrupt_handler);
 
         // Needs unsafe for the set_stack_index method.
         unsafe {
@@ -63,7 +69,14 @@ extern "x86-interrupt" fn double_fault_handler(stack_frame: &mut ExceptionStackF
     // Make sure we print only one in this case.
     // Since it is inrecoverable, it will keep getting the same error
     // and therefore, keep printing the same thing again and again and again...
-    loop {}
+    hlt_loop();
+}
+
+extern "x86-interrupt" fn timer_interrupt_handler(
+    _stack_frame: &mut ExceptionStackFrame)
+{
+    kprint!(".");
+    unsafe { PICS.lock().notify_end_of_interrupt(TIMER_INTERRUPT_ID) }
 }
 
 /// Helper function to the exception handler functions
