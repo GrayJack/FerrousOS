@@ -54,7 +54,7 @@ pub struct SerialPort {
 impl SerialPort {
     /// Create a new instance of SerialPort.
     // pub const fn new(base: PortAddress) -> SerialPort {
-    pub fn new(base: PortAddress) -> SerialPort {
+    pub fn new(base: PortAddress) -> Self {
         let base = base as u16;
         SerialPort {
             data: Port::new(base),

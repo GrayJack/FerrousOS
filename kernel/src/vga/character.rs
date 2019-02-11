@@ -35,7 +35,7 @@ pub struct Character {
 
 impl Character {
     /// Creates a new instance of Character.
-    pub fn new(character: u8, foreground: Color, background: Color) -> Character {
+    pub fn new(character: u8, foreground: Color, background: Color) -> Self {
         let attribute = ((background as u8) << 4) + (foreground as u8);
 
         Character {
