@@ -45,7 +45,7 @@ impl Character {
     }
 
     /// Converts Character into a tuple of bytes
-    pub fn as_bytes(&self) -> (u8, u8) {
+    pub fn as_bytes(self) -> (u8, u8) {
         (self.character, self.attribute)
     }
 }

@@ -88,7 +88,7 @@ extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: &mut ExceptionSt
 extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: &mut ExceptionStackFrame) {
     let port = Port::new(0x60);
     let scancode: u8 = unsafe{ port.read() };
-    kprint!("hello");
+    kprint!("{}", scancode);
     unsafe { PICS.lock().notify_end_of_interrupt(KEYBOARD_INTERRUPT_ID) }
 }
 
