@@ -1,4 +1,6 @@
 # FerrousOS
+[![Build Status](https://api.travis-ci.com/GrayJack/FerrousOS.svg?branch=master)](https://travis-ci.com/GrayJack/FerrousOS)
+
 My first OS that I intend to make it complete in some years
 
 ## Building requirements
