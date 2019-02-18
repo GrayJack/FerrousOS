@@ -48,5 +48,13 @@ pub extern "C" fn _start() -> ! {
     //
     // stack_overflow();
 
+    // Page fault test
+    // new
+    let ptr = 0x204370 as *mut u32;
+    // read from a code page -> works
+    unsafe { let x = *ptr; }
+    // write to a code page -> page fault
+    // unsafe { *ptr = 42; }
+
     hlt_loop();
 }

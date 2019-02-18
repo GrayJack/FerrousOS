@@ -12,8 +12,10 @@ use crate::{
 
 use x86_64::{
     instructions::port::Port,
+    registers::control::Cr2,
     structures::idt::{
         ExceptionStackFrame,
+        PageFaultErrorCode,
         InterruptDescriptorTable as Idt
     }
 };
@@ -35,6 +37,7 @@ lazy_static! {
 
         idt.divide_by_zero.set_handler_fn(divide_by_zero_handler);
         idt.breakpoint.set_handler_fn(breakpoint_handler);
+        idt.page_fault.set_handler_fn(page_fault_handler);
         idt[usize::from(TIMER_INTERRUPT_ID)].set_handler_fn(timer_interrupt_handler);
         idt[usize::from(KEYBOARD_INTERRUPT_ID)].set_handler_fn(keyboard_interrupt_handler);
 
@@ -78,17 +81,50 @@ extern "x86-interrupt" fn double_fault_handler(stack_frame: &mut ExceptionStackF
     hlt_loop();
 }
 
+/// Page fault handler
+extern "x86-interrupt" fn page_fault_handler(
+    stack_frame: &mut ExceptionStackFrame,
+    error_code: PageFaultErrorCode,
+) {
+    VGA.lock().set_foreground(Color::Red);
+    kprintln!("EXCEPTION: PAGE FAULT");
+    kprintln!("Error code: {:?}", error_code);
+    kprintln!("Accessed Address: {:?}", Cr2::read());
+    kprintln!("{:#?}", stack_frame);
+
+    VGA.lock().set_foreground(Color::Green);
+    hlt_loop();
+}
+
 /// Time interrupt handler
 extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: &mut ExceptionStackFrame) {
-    kprint!(".");
+    // kprint!(".");
     unsafe { PICS.lock().notify_end_of_interrupt(TIMER_INTERRUPT_ID) }
 }
 
 /// Keyboard interrupt handler
 extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: &mut ExceptionStackFrame) {
+    use spin::Mutex;
+    use pc_keyboard::{Keyboard, ScancodeSet1, DecodedKey, HandleControl, layouts};
+
+    lazy_static! {
+        static ref KEYBOARD: Mutex<Keyboard<layouts::Us104Key, ScancodeSet1>> =
+            Mutex::new(Keyboard::new(layouts::Us104Key, ScancodeSet1, HandleControl::MapLettersToUnicode));
+    }
+
+    let mut keyboard = KEYBOARD.lock();
     let port = Port::new(0x60);
+
     let scancode: u8 = unsafe{ port.read() };
-    kprint!("{}", scancode);
+    if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
+        if let Some(key) = keyboard.process_keyevent(key_event) {
+            match key {
+                DecodedKey::Unicode(character) => kprint!("{}", character),
+                DecodedKey::RawKey(key) => kprint!("{:?}", key),
+            }
+        }
+    }
+
     unsafe { PICS.lock().notify_end_of_interrupt(KEYBOARD_INTERRUPT_ID) }
 }
 
