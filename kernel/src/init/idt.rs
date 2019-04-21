@@ -14,7 +14,7 @@ use x86_64::{
     instructions::port::Port,
     registers::control::Cr2,
     structures::idt::{
-        ExceptionStackFrame,
+        InterruptStackFrame,
         PageFaultErrorCode,
         InterruptDescriptorTable as Idt
     }
@@ -63,17 +63,17 @@ pub fn init() -> Result<(), &'static str> {
 // If happens to be not possible, print the exception and enter a infinite loop.
 
 /// Divide by Zero exception handler
-extern "x86-interrupt" fn divide_by_zero_handler(stack_frame: &mut ExceptionStackFrame) {
+extern "x86-interrupt" fn divide_by_zero_handler(stack_frame: &mut InterruptStackFrame) {
     exception_info("DIVIDE BY ZERO", stack_frame);
 }
 
 /// Breakpoint exception handler
-extern "x86-interrupt" fn breakpoint_handler(stack_frame: &mut ExceptionStackFrame) {
+extern "x86-interrupt" fn breakpoint_handler(stack_frame: &mut InterruptStackFrame) {
     exception_info("BREAKPOINT", stack_frame);
 }
 
 /// Double Fault exception handler
-extern "x86-interrupt" fn double_fault_handler(stack_frame: &mut ExceptionStackFrame, _error_code: u64) {
+extern "x86-interrupt" fn double_fault_handler(stack_frame: &mut InterruptStackFrame, _error_code: u64) {
     exception_info("DOUBLE FAULT", stack_frame);
     // Make sure we print only one in this case.
     // Since it is inrecoverable, it will keep getting the same error
@@ -83,7 +83,7 @@ extern "x86-interrupt" fn double_fault_handler(stack_frame: &mut ExceptionStackF
 
 /// Page fault handler
 extern "x86-interrupt" fn page_fault_handler(
-    stack_frame: &mut ExceptionStackFrame,
+    stack_frame: &mut InterruptStackFrame,
     error_code: PageFaultErrorCode,
 ) {
     VGA.lock().set_foreground(Color::Red);
@@ -97,13 +97,13 @@ extern "x86-interrupt" fn page_fault_handler(
 }
 
 /// Time interrupt handler
-extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: &mut ExceptionStackFrame) {
+extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: &mut InterruptStackFrame) {
     // kprint!(".");
     unsafe { PICS.lock().notify_end_of_interrupt(TIMER_INTERRUPT_ID) }
 }
 
 /// Keyboard interrupt handler
-extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: &mut ExceptionStackFrame) {
+extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: &mut InterruptStackFrame) {
     use spin::Mutex;
     use pc_keyboard::{Keyboard, ScancodeSet1, DecodedKey, HandleControl, layouts};
 
@@ -129,7 +129,7 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: &mut Exceptio
 }
 
 /// Helper function to the exception handler functions
-fn exception_info(type_str: &str, stack_frame: &mut ExceptionStackFrame) {
+fn exception_info(type_str: &str, stack_frame: &mut InterruptStackFrame) {
     VGA.lock().set_foreground(Color::Red);
     kprintln!("EXCEPTION: {}\n{:#?}", type_str, stack_frame);
     VGA.lock().set_foreground(Color::Green);

@@ -6,20 +6,17 @@ edition = "2018"
 
 [package.metadata.bootimage]
 default-target = "kernel.json"
-
-[package.metadata.bootimage.bootloader]
-name = "bootloader"
-target = "x86_64-bootloader.json"
+# run-command = ["qemu-system-x86_64", "-drive", "format=raw,file={}"]
 
 [workspace]
 
 [dependencies]
-bootloader = "^0.3.14"
+bootloader = "^0.5.3"
 spin = "^0.5.0"
-x86_64 = "^0.4.2"
+x86_64 = "^0.5.4"
 bitflags = "^1.0.4"
 pic8259_simple = "^0.1.1"
-lazy_static = { version = "^1.2.0", features = ["spin_no_std"] }
+lazy_static = { version = "^1.3.0", features = ["spin_no_std"] }
 pc-keyboard = "^0.5.0"
 
 [[bin]]

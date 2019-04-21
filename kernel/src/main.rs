@@ -15,6 +15,10 @@ use kernel::{
     }
 };
 
+// use x86_64::{
+//     structures::paging::PageTable,
+//     registers::control::Cr3
+// };
 
 #[cfg(not(test))]
 pub mod panic;
@@ -50,11 +54,18 @@ pub extern "C" fn _start() -> ! {
 
     // Page fault test
     // new
-    let ptr = 0x204370 as *mut u32;
+    // let ptr = 0x204370 as *mut u32;
     // read from a code page -> works
-    unsafe { let x = *ptr; }
+    // unsafe { let x = *ptr; }
     // write to a code page -> page fault
     // unsafe { *ptr = 42; }
+
+    // Testing accessing page tables
+    // let level_4_table_ptr = 0xffff_ffff_ffff_f000 as *const PageTable;
+    // let level_4_table = unsafe {&*level_4_table_ptr};
+    // for i in 0..10 {
+    //     kprintln!("Entry {}: {:?}", i, level_4_table[i]);
+    // }
 
     hlt_loop();
 }
