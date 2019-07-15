@@ -80,7 +80,7 @@ impl SerialPort {
         }
     }
 
-    fn line_sts(&self) -> LineStsFlags {
+    fn line_sts(&mut self) -> LineStsFlags {
         unsafe {
             LineStsFlags::from_bits_truncate(self.line_sts.read())
         }

@@ -3,10 +3,15 @@
 #![no_std]
 #![no_main]
 
+#![feature(custom_test_frameworks)]
+#![test_runner(test_runner)]
+#![reexport_test_harness_main = "test_main"]
+
 use kernel::{
     self,
     hlt_loop,
     uart::{PortAddress, SerialPort},
+    kprint,
     kprintln,
     init::{
         gdt,
@@ -28,9 +33,12 @@ pub extern "C" fn _start() -> ! {
     gdt::init().unwrap();
     idt::init().unwrap();
     unsafe { PICS.lock().initialize() };
-    x86_64::instructions::interrupts::enable();
+    // x86_64::instructions::interrupts::enable();
 
     kprintln!("Hello Kernel World!!");
+
+    #[cfg(test)]
+    test_main();
 
     // let mut serial1 = SerialPort::new(PortAddress::COM1);
     // serial1.init();
@@ -68,4 +76,19 @@ pub extern "C" fn _start() -> ! {
     // }
 
     hlt_loop();
+}
+
+#[cfg(test)]
+fn test_runner(tests: &[&dyn Fn()]) {
+    kprintln!("Running {} tests", tests.len());
+    for test in tests {
+        test();
+    }
+}
+
+#[test_case]
+fn trivial_assertion() {
+    kprint!("trivial assertion... ");
+    assert_eq!(1, 1);
+    kprintln!("[ok]");
 }

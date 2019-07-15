@@ -15,6 +15,7 @@ const ROWS: usize = 25;
 const COLS: usize = 80;
 
 /// VGA struct. It needs to receive a mutable slice of u8.
+#[derive(Copy, Clone)]
 pub struct Vga<T: AsMut<[u8]>> {
     slice: T,
     buffer: [Character; ROWS * COLS],
@@ -96,12 +97,11 @@ impl<T: AsMut<[u8]>> Vga<T> {
     fn write_byte(&mut self, byte: u8) {
         let i = self.position;
 
-        if byte == '\n' as u8 {
+        if byte == b'\n' {
             let curr_line = self.position / COLS;
             self.position = (curr_line + 1) * COLS;
         } else {
             self.buffer[i] = Character::new(byte, self.foreground, self.background);
-
             self.position += 1;
         }
 
