@@ -1,13 +1,9 @@
 use x86_64::{
     structures::{
+        gdt::{Descriptor, GlobalDescriptorTable as Gdt, SegmentSelector},
         tss::TaskStateSegment as Tss,
-        gdt::{
-            GlobalDescriptorTable as Gdt,
-            SegmentSelector,
-            Descriptor
-        },
     },
-    VirtAddr
+    VirtAddr,
 };
 
 use lazy_static::lazy_static;
@@ -43,10 +39,7 @@ lazy_static! {
 
 /// Loads the default Global Descriptor Table.
 pub fn init() -> Result<(), &'static str> {
-    use x86_64::instructions::{
-        segmentation::set_cs,
-        tables::load_tss,
-    };
+    use x86_64::instructions::{segmentation::set_cs, tables::load_tss};
 
     GDT.0.load();
 
@@ -70,7 +63,7 @@ impl Selectors {
     pub fn new(code_selector: SegmentSelector, tss_selector: SegmentSelector) -> Selectors {
         Selectors {
             code_selector,
-            tss_selector
+            tss_selector,
         }
     }
 }

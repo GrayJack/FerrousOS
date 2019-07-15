@@ -3,13 +3,13 @@
 //! It allows to write in screen in ASCII
 use core::{
     fmt::{self, Write},
-    ptr
+    ptr,
 };
 
 mod character;
 
-pub use crate::vga::character::Color;
 use crate::vga::character::Character;
+pub use crate::vga::character::Color;
 
 const ROWS: usize = 25;
 const COLS: usize = 80;
@@ -44,7 +44,7 @@ impl<T: AsMut<[u8]>> Vga<T> {
             buffer,
             position: 0,
             foreground,
-            background
+            background,
         }
     }
 

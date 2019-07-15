@@ -1,10 +1,10 @@
 #![no_std]
 #![feature(abi_x86_interrupt)]
 
-pub mod vga;
-pub mod uart;
-pub mod init;
 pub mod hid;
+pub mod init;
+pub mod uart;
+pub mod vga;
 
 /// A loop that doesn't let the CPU cores at max clock
 /// halting the CPU usage when in a dead loop

@@ -1,10 +1,8 @@
 //! Very basic Universal Asynchronous Receiver-Transmitter 16550 (UART) implementation
 
 // Got from uart_16550 package, but it doesn't have a git repository and hasn't been updated in 8 months
+use core::fmt::{self, Write};
 
-use core::{
-    fmt::{self, Write}
-};
 use bitflags::bitflags;
 use x86_64::instructions::port::Port;
 
@@ -16,7 +14,7 @@ pub enum PortAddress {
     COM1 = 0x3F8,
     COM2 = 0x2F8,
     COM3 = 0x3E8,
-    COM4 = 0x2E8
+    COM4 = 0x2E8,
 }
 
 bitflags! {
@@ -81,9 +79,7 @@ impl SerialPort {
     }
 
     fn line_sts(&mut self) -> LineStsFlags {
-        unsafe {
-            LineStsFlags::from_bits_truncate(self.line_sts.read())
-        }
+        unsafe { LineStsFlags::from_bits_truncate(self.line_sts.read()) }
     }
 
     /// Put serial port to receive data
@@ -106,7 +102,7 @@ impl SerialPort {
                     self.data.write(b' ');
                     while !self.line_sts().contains(LineStsFlags::OUTPUT_EMPTY) {}
                     self.data.write(8);
-                },
+                }
                 _ => {
                     while !self.line_sts().contains(LineStsFlags::OUTPUT_EMPTY) {}
                     self.data.write(data);

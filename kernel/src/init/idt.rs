@@ -1,23 +1,18 @@
 use crate::{
     hlt_loop,
-    vga::Color,
     init::{
         gdt,
         pic::{PICS, PIC_1_OFFSET},
-        vga::VGA
+        vga::VGA,
     },
-    kprintln,
-    kprint,
+    kprint, kprintln,
+    vga::Color,
 };
 
 use x86_64::{
     instructions::port::Port,
     registers::control::Cr2,
-    structures::idt::{
-        InterruptStackFrame,
-        PageFaultErrorCode,
-        InterruptDescriptorTable as Idt
-    }
+    structures::idt::{InterruptDescriptorTable as Idt, InterruptStackFrame, PageFaultErrorCode},
 };
 
 use lazy_static::lazy_static;
@@ -73,7 +68,10 @@ extern "x86-interrupt" fn breakpoint_handler(stack_frame: &mut InterruptStackFra
 }
 
 /// Double Fault exception handler
-extern "x86-interrupt" fn double_fault_handler(stack_frame: &mut InterruptStackFrame, _error_code: u64) {
+extern "x86-interrupt" fn double_fault_handler(
+    stack_frame: &mut InterruptStackFrame,
+    _error_code: u64,
+) {
     exception_info("DOUBLE FAULT", stack_frame);
     // Make sure we print only one in this case.
     // Since it is inrecoverable, it will keep getting the same error
@@ -104,18 +102,22 @@ extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: &mut InterruptSt
 
 /// Keyboard interrupt handler
 extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: &mut InterruptStackFrame) {
+    use pc_keyboard::{layouts, DecodedKey, HandleControl, Keyboard, ScancodeSet1};
     use spin::Mutex;
-    use pc_keyboard::{Keyboard, ScancodeSet1, DecodedKey, HandleControl, layouts};
 
     lazy_static! {
         static ref KEYBOARD: Mutex<Keyboard<layouts::Us104Key, ScancodeSet1>> =
-            Mutex::new(Keyboard::new(layouts::Us104Key, ScancodeSet1, HandleControl::MapLettersToUnicode));
+            Mutex::new(Keyboard::new(
+                layouts::Us104Key,
+                ScancodeSet1,
+                HandleControl::MapLettersToUnicode
+            ));
     }
 
     let mut keyboard = KEYBOARD.lock();
     let mut port = Port::new(0x60);
 
-    let scancode: u8 = unsafe{ port.read() };
+    let scancode: u8 = unsafe { port.read() };
     if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
         if let Some(key) = keyboard.process_keyevent(key_event) {
             match key {
