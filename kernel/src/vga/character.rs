@@ -50,25 +50,26 @@ impl Character {
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-//
-//     #[test]
-//     fn creation() {
-//         let character = Character::new(b'a', Color::Blue, Color::BrightMagenta);
-//
-//         assert_eq!(character.character, b'a');
-//         assert_eq!(character.attribute, 0xD1);
-//
-//         let character = Character::new(b'b', Color::Yellow, Color::Red);
-//
-//         assert_eq!(character.character, b'b');
-//         assert_eq!(character.attribute, 0x4E);
-//
-//         let character = Character::new(b'c', Color::DarkGray, Color::White);
-//
-//         assert_eq!(character.character, b'c');
-//         assert_eq!(character.attribute, 0xF8);
-//     }
-// }
+#[cfg(test)]
+#[test_case]
+fn creation() {
+    use crate::prelude::*;
+
+    testprint!("crate::vga::Character: creation... ");
+    let character = Character::new(b'a', Color::Blue, Color::BrightMagenta);
+
+    assert_eq!(character.character, b'a');
+    assert_eq!(character.attribute, 0xD1);
+
+    let character = Character::new(b'b', Color::Yellow, Color::Red);
+
+    assert_eq!(character.character, b'b');
+    assert_eq!(character.attribute, 0x4E);
+
+    let character = Character::new(b'c', Color::DarkGray, Color::White);
+
+    assert_eq!(character.character, b'c');
+    assert_eq!(character.attribute, 0xF8);
+
+    testprintln!(Color::Green; "[Ok]");
+}

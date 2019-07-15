@@ -23,10 +23,7 @@ pub fn hlt_loop() -> ! {
 pub fn test_runner(tests: &[&dyn Fn()]) {
     use crate::prelude::*;
 
-    s1println!("Running {} tests", tests.len());
-    vgacolor!(Color::Green);
-    kprintln!("Running {} tests", tests.len());
-    vgacolor!(Color::White);
+    testprintln!(Color::Green; "Running {} tests", tests.len());
 
     for test in tests {
         test();
@@ -38,7 +35,7 @@ pub fn test_runner(tests: &[&dyn Fn()]) {
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     test_main();
-    loop {}
+    hlt_loop();
 }
 
 #[cfg(test)]

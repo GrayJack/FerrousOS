@@ -6,6 +6,7 @@ pub use crate::{
         serial::{SERIAL1, SERIAL2},
         vga::VGA,
     },
-    kprint, kprintln, s1print, s1println, vgacolor,
+    kprint, kprintln, s1print, s1println, testprint, testprintln,
     vga::Color,
+    vgacolor,
 };

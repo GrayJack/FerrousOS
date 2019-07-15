@@ -1,7 +1,4 @@
-use crate::{
-    prelude::*,
-    init::pic::PIC_1_OFFSET,
-};
+use crate::{init::pic::PIC_1_OFFSET, prelude::*};
 
 use x86_64::{
     instructions::port::Port,

@@ -62,3 +62,14 @@ pub extern "C" fn _start() -> ! {
 
     hlt_loop();
 }
+
+
+pub fn test_runner(tests: &[&dyn Fn()]) {
+    use kernel::prelude::*;
+
+    testprintln!(Color::Green; "Running {} tests", tests.len());
+
+    for test in tests {
+        test();
+    }
+}
