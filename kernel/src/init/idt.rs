@@ -22,8 +22,24 @@ lazy_static! {
         // Ideally, we should have a fn set_interrupt(n: u8, f: HandlerFunc)
 
         idt.divide_by_zero.set_handler_fn(divide_by_zero_handler);
+        idt.debug.set_handler_fn(debug_handler);
+        idt.non_maskable_interrupt.set_handler_fn(non_maskable_handler);
         idt.breakpoint.set_handler_fn(breakpoint_handler);
+        idt.overflow.set_handler_fn(overflow_handler);
+        idt.bound_range_exceeded.set_handler_fn(bound_range_handler);
+        idt.invalid_opcode.set_handler_fn(invalid_opcode_handler);
+        idt.device_not_available.set_handler_fn(dev_not_available_handler);
         idt.page_fault.set_handler_fn(page_fault_handler);
+        idt.invalid_tss.set_handler_fn(invalid_tss_handler);
+        idt.segment_not_present.set_handler_fn(seg_not_present_handler);
+        idt.stack_segment_fault.set_handler_fn(stack_segment_handler);
+        idt.general_protection_fault.set_handler_fn(protection_fault_handler);
+        idt.x87_floating_point.set_handler_fn(x87_floating_point_handler);
+        idt.alignment_check.set_handler_fn(alignment_check_handler);
+        idt.machine_check.set_handler_fn(machine_check_handler);
+        idt.virtualization.set_handler_fn(virtualization_handler);
+        idt.security_exception.set_handler_fn(security_exception_handler);
+        idt.simd_floating_point.set_handler_fn(simd_float_handler);
         idt[usize::from(TIMER_INTERRUPT_ID)].set_handler_fn(timer_interrupt_handler);
         idt[usize::from(KEYBOARD_INTERRUPT_ID)].set_handler_fn(keyboard_interrupt_handler);
 
@@ -53,20 +69,158 @@ extern "x86-interrupt" fn divide_by_zero_handler(stack_frame: &mut InterruptStac
     exception_info("DIVIDE BY ZERO", stack_frame);
 }
 
+/// Non Maskable Interrupt exception handler
+extern "x86-interrupt" fn non_maskable_handler(stack_frame: &mut InterruptStackFrame) {
+    exception_info("NON MASKABLE INTERRUPT", stack_frame);
+}
+
+/// Debug exception handler
+extern "x86-interrupt" fn debug_handler(stack_frame: &mut InterruptStackFrame) {
+    exception_info("DEBUG", stack_frame);
+}
+
 /// Breakpoint exception handler
 extern "x86-interrupt" fn breakpoint_handler(stack_frame: &mut InterruptStackFrame) {
     exception_info("BREAKPOINT", stack_frame);
 }
 
+/// Overflow exception handler
+extern "x86-interrupt" fn overflow_handler(stack_frame: &mut InterruptStackFrame) {
+    exception_info("OVERFLOW", stack_frame);
+}
+
+/// Bound Range Exceeded exception handler
+extern "x86-interrupt" fn bound_range_handler(stack_frame: &mut InterruptStackFrame) {
+    exception_info("BOUND RANGE EXCEEDED", stack_frame);
+}
+
+/// Invalid Opcode exception handler
+extern "x86-interrupt" fn invalid_opcode_handler(stack_frame: &mut InterruptStackFrame) {
+    exception_info("INVALID OPTICODE", stack_frame);
+}
+
+/// Device Not Available exception handler
+extern "x86-interrupt" fn dev_not_available_handler(stack_frame: &mut InterruptStackFrame) {
+    exception_info("DEVICE NOT AVAILABLE", stack_frame);
+}
+
+/// Device Not Available exception handler
+extern "x86-interrupt" fn x87_floating_point_handler(stack_frame: &mut InterruptStackFrame) {
+    exception_info("X87 FLOATING POINT", stack_frame);
+}
+
+/// Machine Check exception handler
+extern "x86-interrupt" fn machine_check_handler(stack_frame: &mut InterruptStackFrame) {
+    exception_info("X87 MACHINE CHECK", stack_frame);
+}
+
+/// SIMD Floating Point exception handler
+extern "x86-interrupt" fn simd_float_handler(stack_frame: &mut InterruptStackFrame) {
+    exception_info("SIMD FLOATING POINT", stack_frame);
+}
+
+/// Virtualization exception handler
+extern "x86-interrupt" fn virtualization_handler(stack_frame: &mut InterruptStackFrame) {
+    exception_info("VIRTUALIZATION", stack_frame);
+}
+
 /// Double Fault exception handler
 extern "x86-interrupt" fn double_fault_handler(
     stack_frame: &mut InterruptStackFrame,
-    _error_code: u64,
+    error_code: u64,
 ) {
-    exception_info("DOUBLE FAULT", stack_frame);
+    vgacolor!(Color::Red);
+    kprintln!("EXCEPTION: DOUBLE FAULT");
+    kprintln!("Error code: {:?}", error_code);
+    kprintln!("{:#?}", stack_frame);
+    vgacolor!(Color::White);
     // Make sure we print only one in this case.
     // Since it is inrecoverable, it will keep getting the same error
     // and therefore, keep printing the same thing again and again and again...
+    hlt_loop();
+}
+
+/// Invalid TSS exception handler
+extern "x86-interrupt" fn invalid_tss_handler(
+    stack_frame: &mut InterruptStackFrame,
+    error_code: u64,
+) {
+    vgacolor!(Color::Red);
+    kprintln!("EXCEPTION: INVALID TSS");
+    kprintln!("Error code: {:?}", error_code);
+    kprintln!("{:#?}", stack_frame);
+
+    vgacolor!(Color::White);
+    hlt_loop();
+}
+
+/// Segment Not Present exception handler
+extern "x86-interrupt" fn seg_not_present_handler(
+    stack_frame: &mut InterruptStackFrame,
+    error_code: u64,
+) {
+    vgacolor!(Color::Red);
+    kprintln!("EXCEPTION: SEGMENT NOT PRESENT");
+    kprintln!("Error code: {:?}", error_code);
+    kprintln!("{:#?}", stack_frame);
+
+    vgacolor!(Color::White);
+    hlt_loop();
+}
+
+/// Stack Segment Fault exception handler
+extern "x86-interrupt" fn stack_segment_handler(
+    stack_frame: &mut InterruptStackFrame,
+    error_code: u64,
+) {
+    vgacolor!(Color::Red);
+    kprintln!("EXCEPTION: STACK SEGMENT FAULT");
+    kprintln!("Error code: {:?}", error_code);
+    kprintln!("{:#?}", stack_frame);
+
+    vgacolor!(Color::White);
+    hlt_loop();
+}
+
+/// General Protection Fault exception handler
+extern "x86-interrupt" fn protection_fault_handler(
+    stack_frame: &mut InterruptStackFrame,
+    error_code: u64,
+) {
+    vgacolor!(Color::Red);
+    kprintln!("EXCEPTION: GENERAL PROTECTION FAULT");
+    kprintln!("Error code: {:?}", error_code);
+    kprintln!("{:#?}", stack_frame);
+
+    vgacolor!(Color::White);
+    hlt_loop();
+}
+
+/// Alignment Check exception handler
+extern "x86-interrupt" fn alignment_check_handler(
+    stack_frame: &mut InterruptStackFrame,
+    error_code: u64,
+) {
+    vgacolor!(Color::Red);
+    kprintln!("EXCEPTION: ALIGNMENT CHECK");
+    kprintln!("Error code: {:?}", error_code);
+    kprintln!("{:#?}", stack_frame);
+
+    vgacolor!(Color::White);
+    hlt_loop();
+}
+
+/// Security Exception exception handler
+extern "x86-interrupt" fn security_exception_handler(
+    stack_frame: &mut InterruptStackFrame,
+    error_code: u64,
+) {
+    vgacolor!(Color::Red);
+    kprintln!("EXCEPTION: ALIGNMENT CHECK");
+    kprintln!("Error code: {:?}", error_code);
+    kprintln!("{:#?}", stack_frame);
+
+    vgacolor!(Color::White);
     hlt_loop();
 }
 

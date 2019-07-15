@@ -9,11 +9,6 @@
 
 use kernel::{self, prelude::*};
 
-// use x86_64::{
-//     structures::paging::PageTable,
-//     registers::control::Cr3
-// };
-
 #[cfg(not(test))]
 pub mod panic;
 
@@ -30,7 +25,7 @@ pub extern "C" fn _start() -> ! {
     test_main();
 
     // invoke a breakpoint exception
-    // x86_64::instructions::int3();
+    // x86_64::instructions::interrupts::int3();
 
     // Trigger a page fault
     // Double fault exception
