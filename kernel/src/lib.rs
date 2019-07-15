@@ -1,8 +1,14 @@
 #![no_std]
 #![feature(abi_x86_interrupt)]
+#![cfg_attr(test, no_main)]
+#![feature(custom_test_frameworks)]
+#![test_runner(crate::test_runner)]
+#![reexport_test_harness_main = "test_main"]
 
 pub mod hid;
 pub mod init;
+mod macros;
+pub mod prelude;
 pub mod uart;
 pub mod vga;
 
@@ -14,56 +20,38 @@ pub fn hlt_loop() -> ! {
     }
 }
 
-/// Macro for printing to the standard output, with a newline.
-///
-/// There is 2 ways of using it: Especifying where to print, or
-/// using the standard VGA output in the kernel.
-///
-/// # Examples
-/// ```rust
-/// // Especifying
-/// kprintln!(VGA, "MyText");
-///
-/// // Using standard
-/// kprintln!("MyText");
-/// ```
-#[macro_export]
-macro_rules! kprintln {
-    ($fmt:expr) => ($crate::kprint!(concat!($fmt, "\n")));
-    ($fmt:expr, $($arg:tt)*) => ($crate::kprint!(concat!($fmt, "\n"), $($arg)*));
-    ($ctx:ident, $fmt:expr) => ($crate::kprint!($ctx, concat!($fmt, "\n")));
-    ($ctx:ident, $fmt:expr, $($arg:tt)*) => ($crate::kprint!($ctx, concat!($fmt, "\n"), $($arg)*));
+pub fn test_runner(tests: &[&dyn Fn()]) {
+    use crate::prelude::*;
+
+    s1println!("Running {} tests", tests.len());
+    vgacolor!(Color::Green);
+    kprintln!("Running {} tests", tests.len());
+    vgacolor!(Color::White);
+
+    for test in tests {
+        test();
+    }
 }
 
-/// Macro for printing to the standard output.
-///
-/// There is 2 ways of using it: Especifying where to print, or
-/// using the standard VGA output in the kernel.
-///
-/// # Examples
-/// ```rust
-/// // Especifying
-/// kprint!(VGA, "MyText");
-///
-/// // Using standard
-/// kprint!("MyText");
-/// ```
-#[macro_export]
-macro_rules! kprint {
-    ($($arg:tt)*) => ({
-        use core::fmt::Write;
-        use x86_64::instructions::interrupts;
-        interrupts::without_interrupts(|| {
-            $crate::init::vga::VGA.lock().write_fmt(format_args!($($arg)*)).unwrap();
-            $crate::init::vga::VGA.lock().flush();
-        });
-    });
-    ($ctx:ident, $($arg:tt)*) => ({
-        use core::fmt::Write;
-        use x86_64::instructions::interrupts;
-        interrupts::without_interrupts(|| {
-            $ctx.write_fmt(format_args!($($arg)*)).unwrap();
-            $ctx.flush();
-        });
-    });
+/// Entry point for `cargo xtest`
+#[cfg(test)]
+#[no_mangle]
+pub extern "C" fn _start() -> ! {
+    test_main();
+    loop {}
+}
+
+#[cfg(test)]
+#[panic_handler]
+fn panic(info: &core::panic::PanicInfo) -> ! {
+    use crate::prelude::*;
+    s1println!("[failed]\n");
+    s1println!("Error: {}\n", info);
+
+    vgacolor!(Color::Red);
+    kprintln!("[failed]\n");
+    kprintln!("Error: {}\n", info);
+    vgacolor!(Color::White);
+
+    hlt_loop()
 }

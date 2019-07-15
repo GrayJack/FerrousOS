@@ -1,6 +1,5 @@
 //! Very basic Universal Asynchronous Receiver-Transmitter 16550 (UART) implementation
 
-// Got from uart_16550 package, but it doesn't have a git repository and hasn't been updated in 8 months
 use core::fmt::{self, Write};
 
 use bitflags::bitflags;
@@ -51,8 +50,10 @@ pub struct SerialPort {
 
 impl SerialPort {
     /// Create a new instance of SerialPort.
-    // pub const fn new(base: PortAddress) -> SerialPort {
-    pub fn new(base: PortAddress) -> Self {
+    ///
+    /// This function is unsafe because the caller must ensure that the given base address
+    /// really points to a serial port device.
+    pub const unsafe fn new(base: PortAddress) -> Self {
         let base = base as u16;
         SerialPort {
             data: Port::new(base),

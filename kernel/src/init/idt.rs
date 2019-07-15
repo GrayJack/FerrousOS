@@ -1,12 +1,6 @@
 use crate::{
-    hlt_loop,
-    init::{
-        gdt,
-        pic::{PICS, PIC_1_OFFSET},
-        vga::VGA,
-    },
-    kprint, kprintln,
-    vga::Color,
+    prelude::*,
+    init::pic::PIC_1_OFFSET,
 };
 
 use x86_64::{
@@ -84,13 +78,13 @@ extern "x86-interrupt" fn page_fault_handler(
     stack_frame: &mut InterruptStackFrame,
     error_code: PageFaultErrorCode,
 ) {
-    VGA.lock().set_foreground(Color::Red);
+    vgacolor!(Color::Red);
     kprintln!("EXCEPTION: PAGE FAULT");
     kprintln!("Error code: {:?}", error_code);
     kprintln!("Accessed Address: {:?}", Cr2::read());
     kprintln!("{:#?}", stack_frame);
 
-    VGA.lock().set_foreground(Color::Green);
+    vgacolor!(Color::White);
     hlt_loop();
 }
 
@@ -132,7 +126,7 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: &mut Interrup
 
 /// Helper function to the exception handler functions
 fn exception_info(type_str: &str, stack_frame: &mut InterruptStackFrame) {
-    VGA.lock().set_foreground(Color::Red);
+    vgacolor!(Color::Red);
     kprintln!("EXCEPTION: {}\n{:#?}", type_str, stack_frame);
-    VGA.lock().set_foreground(Color::Green);
+    vgacolor!(Color::Green);
 }

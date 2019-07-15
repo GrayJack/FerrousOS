@@ -34,7 +34,7 @@ impl<T: AsMut<[u8]>> Vga<T> {
         assert_eq!(slice.as_mut().len(), ROWS * COLS * 2);
 
         // Default colors
-        let foreground = Color::Green;
+        let foreground = Color::White;
         let background = Color::Black;
 
         let buffer = [Character::new(b' ', foreground, background); ROWS * COLS];

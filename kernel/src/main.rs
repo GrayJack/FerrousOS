@@ -4,21 +4,10 @@
 #![no_main]
 
 #![feature(custom_test_frameworks)]
-#![test_runner(test_runner)]
+#![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
-use kernel::{
-    self,
-    hlt_loop,
-    uart::{PortAddress, SerialPort},
-    kprint,
-    kprintln,
-    init::{
-        gdt,
-        idt,
-        pic::PICS,
-    }
-};
+use kernel::{self, prelude::*};
 
 // use x86_64::{
 //     structures::paging::PageTable,
@@ -39,10 +28,6 @@ pub extern "C" fn _start() -> ! {
 
     #[cfg(test)]
     test_main();
-
-    // let mut serial1 = SerialPort::new(PortAddress::COM1);
-    // serial1.init();
-    // kprintln!("Hello Serial: {:?}", serial1);
 
     // invoke a breakpoint exception
     // x86_64::instructions::int3();
@@ -76,19 +61,4 @@ pub extern "C" fn _start() -> ! {
     // }
 
     hlt_loop();
-}
-
-#[cfg(test)]
-fn test_runner(tests: &[&dyn Fn()]) {
-    kprintln!("Running {} tests", tests.len());
-    for test in tests {
-        test();
-    }
-}
-
-#[test_case]
-fn trivial_assertion() {
-    kprint!("trivial assertion... ");
-    assert_eq!(1, 1);
-    kprintln!("[ok]");
 }
