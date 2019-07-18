@@ -28,7 +28,7 @@ impl<T: AsMut<[u8]>> Vga<T> {
     /// Creates a new instance of Vga.
     ///
     /// It have the default color as black for background
-    /// and green to foreground.
+    /// and white to foreground.
     pub fn new(mut slice: T) -> Self {
         // We must have enough bytes of backing storage to make this work.
         assert_eq!(slice.as_mut().len(), ROWS * COLS * 2);
@@ -121,5 +121,3 @@ impl<T: AsMut<[u8]>> Write for Vga<T> {
         Ok(())
     }
 }
-
-// TODO: WRITE TESTS!!!!!

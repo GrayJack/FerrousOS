@@ -7,19 +7,63 @@
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
-use kernel::{self, prelude::*};
+use kernel::{self, mem::{self, *}, prelude::*};
+
+use x86_64::{structures::paging::{mapper::MapperAllSizes, PageTable}, VirtAddr};
+use bootloader::{BootInfo, entry_point};
 
 #[cfg(not(test))]
 pub mod panic;
 
-#[no_mangle]
-pub extern "C" fn _start() -> ! {
+entry_point!(kmain);
+
+fn kmain(boot_info: &'static BootInfo) -> ! {
     gdt::init().unwrap();
     idt::init().unwrap();
     unsafe { PICS.lock().initialize() };
     // x86_64::instructions::interrupts::enable();
 
     kprintln!("Hello Kernel World!!");
+
+    let mapper = unsafe { mem::init(boot_info.physical_memory_offset) };
+
+
+    let addresses = [
+        // the identity-mapped vga buffer page
+        0xb8000,
+        // some code page
+        0x20010a,
+        // some stack page
+        0x57ac_001f_fe48,
+        // virtual address mapped to physical address 0
+        boot_info.physical_memory_offset,
+    ];
+
+    for &address in &addresses {
+        let virt = VirtAddr::new(address);
+        let phys = mapper.translate_addr(virt);
+        kprintln!("{:?} -> {:?}", virt, phys);
+    }
+
+    // let l4_table = unsafe { active_level4_table(boot_info.physical_memory_offset) };
+    // for (i, entry) in l4_table.iter().enumerate() {
+    //     if !entry.is_unused() {
+    //         kprintln!("L4 Entry {}: {:?}", i, entry);
+    //
+    //         // get the physical address from the entry and convert it
+    //         let phys = entry.frame().unwrap().start_address();
+    //         let virt = phys.as_u64() + boot_info.physical_memory_offset;
+    //         let ptr = VirtAddr::new(virt).as_mut_ptr();
+    //         let l3_table: &PageTable = unsafe { &*ptr };
+    //
+    //         // print non-empty entries of the level 3 table
+    //         for (i, entry) in l3_table.iter().enumerate() {
+    //             if !entry.is_unused() {
+    //                 kprintln!("  L3 Entry {}: {:?}", i, entry);
+    //             }
+    //         }
+    //     }
+    // }
 
     #[cfg(test)]
     test_main();

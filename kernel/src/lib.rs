@@ -11,6 +11,8 @@ mod macros;
 pub mod prelude;
 pub mod uart;
 pub mod vga;
+pub mod mem;
+
 
 /// A loop that doesn't let the CPU cores at max clock
 /// halting the CPU usage when in a dead loop
@@ -30,10 +32,15 @@ pub fn test_runner(tests: &[&dyn Fn()]) {
     }
 }
 
+#[cfg(test)]
+use bootloader::{BootInfo, entry_point};
+
+#[cfg(test)]
+entry_point!(test_kmain);
+
 /// Entry point for `cargo xtest`
 #[cfg(test)]
-#[no_mangle]
-pub extern "C" fn _start() -> ! {
+fn test_kmain(_boot_info: &'static BootInfo) -> ! {
     test_main();
     hlt_loop();
 }
