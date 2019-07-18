@@ -1,4 +1,4 @@
-use crate::uart::{PortAddress, SerialPort};
+use crate::uart::m16550::{PortAddress, SerialPort};
 
 use lazy_static::lazy_static;
 use spin::Mutex;
