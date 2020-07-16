@@ -21,7 +21,7 @@ lazy_static! {
         // dynamically. H O W?
         // Ideally, we should have a fn set_interrupt(n: u8, f: HandlerFunc)
 
-        idt.divide_by_zero.set_handler_fn(divide_by_zero_handler);
+        idt.divide_error.set_handler_fn(divide_error_handler);
         idt.debug.set_handler_fn(debug_handler);
         idt.non_maskable_interrupt.set_handler_fn(non_maskable_handler);
         idt.breakpoint.set_handler_fn(breakpoint_handler);
@@ -37,6 +37,7 @@ lazy_static! {
         idt.x87_floating_point.set_handler_fn(x87_floating_point_handler);
         idt.alignment_check.set_handler_fn(alignment_check_handler);
         idt.machine_check.set_handler_fn(machine_check_handler);
+        // idt.double_fault.set_handler_fn(double_fault_handler);
         idt.virtualization.set_handler_fn(virtualization_handler);
         idt.security_exception.set_handler_fn(security_exception_handler);
         idt.simd_floating_point.set_handler_fn(simd_float_handler);
@@ -65,7 +66,7 @@ pub fn init() -> Result<(), &'static str> {
 // If happens to be not possible, print the exception and enter a infinite loop.
 
 /// Divide by Zero exception handler
-extern "x86-interrupt" fn divide_by_zero_handler(stack_frame: &mut InterruptStackFrame) {
+extern "x86-interrupt" fn divide_error_handler(stack_frame: &mut InterruptStackFrame) {
     exception_info("DIVIDE BY ZERO", stack_frame);
 }
 
@@ -110,8 +111,12 @@ extern "x86-interrupt" fn x87_floating_point_handler(stack_frame: &mut Interrupt
 }
 
 /// Machine Check exception handler
-extern "x86-interrupt" fn machine_check_handler(stack_frame: &mut InterruptStackFrame) {
+extern "x86-interrupt" fn machine_check_handler(stack_frame: &mut InterruptStackFrame) -> ! {
     exception_info("X87 MACHINE CHECK", stack_frame);
+    // Make sure we print only one in this case.
+    // Since it is inrecoverable, it will keep getting the same error
+    // and therefore, keep printing the same thing again and again and again...
+    hlt_loop();
 }
 
 /// SIMD Floating Point exception handler
@@ -128,7 +133,7 @@ extern "x86-interrupt" fn virtualization_handler(stack_frame: &mut InterruptStac
 extern "x86-interrupt" fn double_fault_handler(
     stack_frame: &mut InterruptStackFrame,
     error_code: u64,
-) {
+) -> ! {
     vgacolor!(Color::Red);
     kprintln!("EXCEPTION: DOUBLE FAULT");
     kprintln!("Error code: {:?}", error_code);
